@@ -1,0 +1,77 @@
+{
+  "name": "konair/hap-payment-package",
+  "version": "1.0.0",
+  "autoload": {
+    "psr-4": {
+      "Konair\\HAP\\Payment\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Konair\\HAP\\Payment\\": "tests/"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "platform": {
+      "php": "8.0"
+    }
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/Konair/hap-shared-package.git"
+    }
+  ],
+  "require": {
+    "php": "8.0.*",
+    "ext-json": "*",
+    "konair/hap-shared-package": "^1.0",
+    "nesbot/carbon": "^2.49",
+    "symfony/http-foundation": "^5.3",
+    "symfony/validator": "^5.2"
+  },
+  "require-dev": {
+    "phpmd/phpmd": "^2.9",
+    "phpstan/extension-installer": "^1.0",
+    "phpstan/phpstan": "^0.12",
+    "phpstan/phpstan-phpunit": "^0.12",
+    "phpunit/phpunit": "^9",
+    "squizlabs/php_codesniffer": "^3.6"
+  },
+  "scripts": {
+    "post-install-cmd": "@git-hooks",
+    "docker-build": "docker build --tag konair-hap-payment-package-php:1.0 .",
+    "docker": "docker run --rm -it -v $(pwd):/app -w /app --expose 80 --name konair-hap-payment-package-php konair-hap-payment-package-php:1.0 /bin/sh",
+    "docker-ssh": [
+      "docker exec konair-package-payment-php sh -c 'rm -rf /root/.ssh'",
+      "docker cp ~/.ssh konair-hap-payment-package-php:/root/.ssh",
+      "docker exec konair-hap-payment-package-php sh -c 'chmod 600 /root/.ssh/id_rsa /root/.ssh/config'",
+      "docker exec konair-hap-payment-package-php sh -c 'chown root:root -R /root/.ssh/'"
+    ],
+    "phpcbf": "vendor/bin/phpcbf --standard=.phpcs.xml.dist",
+    "phpcs": "vendor/bin/phpcs --standard=.phpcs.xml.dist",
+    "phpstan": "php -d memory_limit=2G vendor/bin/phpstan analyse -c .phpstan.neon.dist",
+    "phpmd": "./vendor/bin/phpmd src,tests html .phpmd.xml.dist --reportfile .phpmd-report/index.html",
+    "phpmd-strict": "./vendor/bin/phpmd src,tests html .phpmd.xml.dist --reportfile .phpmd-report/index.html --strict",
+    "phpunit": "vendor/bin/phpunit tests --exclude ignored",
+    "phpunit-all": "vendor/bin/phpunit tests",
+    "phpunit-one": "vendor/bin/phpunit tests --group one",
+    "phpunit-coverage": "php -dpcov.enabled=1 -dpcov.directory=. -dpcov.exclude=\"~vendor~\" ./vendor/bin/phpunit --coverage-html .coverage-report tests",
+    "test": [
+      "@phpunit",
+      "@phpstan",
+      "@phpcs",
+      "@phpmd"
+    ],
+    "git-hooks": [
+      "cp pre-commit.git.hook .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+    ],
+    "ci": [
+      "cp .phpstan.neon.dist phpstan.neon",
+      "cp .phpunit.xml.dist phpunit.xml",
+      "cp .phpmd.xml.dist phpmd.xml",
+      "cp .phpcs.xml.dist phpcs.xml"
+    ]
+  }
+}
